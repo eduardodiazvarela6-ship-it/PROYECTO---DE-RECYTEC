@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RECYTEC | Dashboard Administrativo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+</head>
+<body>
+  <div id="toast" class="toast" role="alert" aria-live="polite"></div>
+  <div id="spinner" class="spinner-overlay hidden">
+    <div class="spinner-card">
+      <div class="spinner"></div>
+      <p>Procesando...</p>
+    </div>
+  </div>
+
+  <main id="loginView" class="view">
+    <section class="login-card">
+      <h1>RECYTEC</h1>
+      <p class="subtitle">Sistema administrativo empresarial</p>
+      <form id="loginForm" autocomplete="off">
+        <label>Usuario</label>
+        <input id="username" type="text" required placeholder="Ingresa tu usuario" />
+        <label>Contraseña</label>
+        <input id="password" type="password" required placeholder="Ingresa tu contraseña" />
+        <button class="btn btn-primary" type="submit">Iniciar sesión</button>
+      </form>
+    </section>
+  </main>
+
+  <div id="appView" class="hidden">
+    <header class="topbar">
+      <div>
+        <h2>Dashboard RECYTEC</h2>
+        <p id="periodInfo" class="muted"></p>
+      </div>
+      <button id="logoutBtn" class="btn btn-danger">Cerrar sesión</button>
+    </header>
+
+    <nav class="tab-nav" id="tabNav">
+      <button class="tab-btn active" data-tab="dashboardTab">Dashboard</button>
+      <button class="tab-btn" data-tab="ingresosTab">Ingresos</button>
+      <button class="tab-btn" data-tab="gastosTab">Gastos</button>
+      <button class="tab-btn" data-tab="trabajadoresTab">Trabajadores</button>
+      <button class="tab-btn" data-tab="historialTab">Historial</button>
+      <button class="tab-btn" data-tab="exportarTab">Exportar</button>
+    </nav>
+
+    <section id="dashboardTab" class="tab-content active">
+      <div class="kpi-grid">
+        <article class="card kpi"><h3>Ingresos período</h3><p id="kpiIngresos">S/ 0.00</p></article>
+        <article class="card kpi"><h3>Gastos período</h3><p id="kpiGastos">S/ 0.00</p></article>
+        <article class="card kpi"><h3>Ganancia actual</h3><p id="kpiGanancia">S/ 0.00</p></article>
+        <article class="card kpi"><h3>Ingresos hoy</h3><p id="kpiIngresosHoy">S/ 0.00</p></article>
+        <article class="card kpi"><h3>Gastos hoy</h3><p id="kpiGastosHoy">S/ 0.00</p></article>
+      </div>
+
+      <div class="actions-grid">
+        <button class="btn btn-primary action" data-go-tab="ingresosTab">Registrar ingreso</button>
+        <button class="btn btn-primary action" data-go-tab="gastosTab">Registrar gasto</button>
+        <button class="btn btn-primary action" data-go-tab="trabajadoresTab">Trabajadores</button>
+        <a class="btn btn-secondary action" href="boletas.html">Boletas HOiN</a>
+        <button id="cerrarPeriodoBtn" class="btn btn-warning action">Cerrar período</button>
+        <button class="btn btn-secondary action" data-go-tab="exportarTab">Exportar reporte</button>
+      </div>
+
+      <div class="chart-grid">
+        <article class="card"><h3>Gastos por día</h3><canvas id="chartGastosDia"></canvas></article>
+        <article class="card"><h3>Ingresos vs gastos</h3><canvas id="chartIngresosGastos"></canvas></article>
+        <article class="card"><h3>Evolución períodos cerrados</h3><canvas id="chartPeriodos"></canvas></article>
+      </div>
+    </section>
+
+    <section id="ingresosTab" class="tab-content">
+      <article class="card">
+        <h3>Registrar ingreso</h3>
+        <form id="ingresoForm" class="form-grid">
+          <input name="descripcion" placeholder="Descripción" required />
+          <input name="monto" type="number" min="0.01" step="0.01" placeholder="Monto" required />
+          <select name="metodo_pago">
+            <option value="efectivo">Efectivo</option>
+            <option value="Yape">Yape</option>
+            <option value="Plin">Plin</option>
+            <option value="transferencia">Transferencia</option>
+            <option value="otro">Otro</option>
+          </select>
+          <button class="btn btn-primary" type="submit">Guardar ingreso</button>
+        </form>
+      </article>
+    </section>
+
+    <section id="gastosTab" class="tab-content">
+      <article class="card">
+        <h3>Registrar gasto</h3>
+        <form id="gastoForm" class="form-grid">
+          <input name="descripcion" placeholder="Descripción" required />
+          <input name="monto" type="number" min="0.01" step="0.01" placeholder="Monto" required />
+          <button class="btn btn-primary" type="submit">Guardar gasto</button>
+        </form>
+      </article>
+    </section>
+
+    <section id="trabajadoresTab" class="tab-content">
+      <div class="split-grid">
+        <article class="card">
+          <h3>Adelantos</h3>
+          <form id="adelantoForm" class="form-grid">
+            <input name="trabajador" placeholder="Trabajador" required />
+            <input name="descripcion" placeholder="Descripción" required />
+            <input name="monto" type="number" min="0.01" step="0.01" placeholder="Monto" required />
+            <button class="btn btn-primary" type="submit">Guardar adelanto</button>
+          </form>
+        </article>
+        <article class="card">
+          <h3>Préstamos</h3>
+          <form id="prestamoForm" class="form-grid">
+            <input name="trabajador" placeholder="Trabajador" required />
+            <input name="descripcion" placeholder="Descripción" required />
+            <input name="monto" type="number" min="0.01" step="0.01" placeholder="Monto" required />
+            <select name="estado">
+              <option value="pendiente">Pendiente</option>
+              <option value="pagado">Pagado</option>
+            </select>
+            <button class="btn btn-primary" type="submit">Guardar préstamo</button>
+          </form>
+        </article>
+      </div>
+
+      <div class="split-grid">
+        <article class="card">
+          <h3>Total adelantado por trabajador</h3>
+          <div id="adelantosResumen"></div>
+        </article>
+        <article class="card">
+          <h3>Deuda pendiente por trabajador</h3>
+          <div id="prestamosResumen"></div>
+        </article>
+      </div>
+
+      <article class="card">
+        <h3>Historial de préstamos</h3>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Fecha</th><th>Trabajador</th><th>Descripción</th><th>Monto</th><th>Estado</th><th>Acción</th></tr></thead>
+            <tbody id="prestamosHistorial"></tbody>
+          </table>
+        </div>
+      </article>
+    </section>
+
+    <section id="historialTab" class="tab-content">
+      <article class="card">
+        <h3>Ingresos del período actual</h3>
+        <div class="table-wrap"><table><thead><tr><th>Fecha</th><th>Descripción</th><th>Monto</th><th>Método</th><th>Acciones</th></tr></thead><tbody id="tablaIngresos"></tbody></table></div>
+      </article>
+      <article class="card">
+        <h3>Gastos del período actual</h3>
+        <div class="table-wrap"><table><thead><tr><th>Fecha</th><th>Descripción</th><th>Monto</th><th>Acciones</th></tr></thead><tbody id="tablaGastos"></tbody></table></div>
+      </article>
+      <article class="card">
+        <h3>Períodos cerrados</h3>
+        <div class="table-wrap"><table><thead><tr><th>Período</th><th>Inicio</th><th>Fin</th><th>Ingresos</th><th>Gastos</th><th>Ganancia</th><th>Estado</th><th>Acciones</th></tr></thead><tbody id="tablaPeriodos"></tbody></table></div>
+      </article>
+    </section>
+
+    <section id="exportarTab" class="tab-content">
+      <article class="card">
+        <h3>Exportación de reportes</h3>
+        <div class="split-grid">
+          <div>
+            <label>Selecciona módulo</label>
+            <select id="exportType">
+              <option value="INGRESOS">Ingresos</option>
+              <option value="GASTOS">Gastos</option>
+              <option value="ADELANTOS">Adelantos</option>
+              <option value="PRESTAMOS">Préstamos</option>
+              <option value="PERIODOS">Períodos</option>
+            </select>
+          </div>
+          <div>
+            <label>Período</label>
+            <select id="exportPeriodo"></select>
+          </div>
+        </div>
+        <div class="actions-grid single-row">
+          <button id="btnExportCsv" class="btn btn-secondary">Exportar CSV</button>
+          <button id="btnExportPdf" class="btn btn-warning">Exportar PDF</button>
+        </div>
+      </article>
+    </section>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
