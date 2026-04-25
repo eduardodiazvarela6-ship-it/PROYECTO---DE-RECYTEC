@@ -35,7 +35,6 @@ function isOnline() {
   return navigator.onLine;
 }
 
-/* GUARDAR EN GOOGLE SHEETS */
 async function apiPost(payload, submitBtn = null) {
   if (!isOnline()) {
     showToast('Sin internet');
@@ -62,7 +61,6 @@ async function apiPost(payload, submitBtn = null) {
   }
 }
 
-/* LEER GOOGLE SHEETS CON JSONP */
 function apiGetSheet(hoja) {
   return new Promise((resolve) => {
     const callbackName = `jsonp_${hoja}_${Date.now()}`;
@@ -103,8 +101,10 @@ async function cargarDatos() {
     state.adelantos = adelantos;
     state.prestamos = prestamos;
 
-    const activo = periodos.find(p => String(p.estado || '').toLowerCase() === 'activo');
-    state.currentPeriodo = activo?.id_periodo || 'Periodo 1';
+    const activos = periodos.filter(p => String(p.estado || '').toLowerCase() === 'activo');
+    const ultimoActivo = activos[activos.length - 1];
+
+    state.currentPeriodo = ultimoActivo?.id_periodo || 'Periodo 1';
 
     renderDashboard();
     renderGraficos();
@@ -128,11 +128,17 @@ function calcularTotales() {
   const hoy = todayISO();
 
   const ingresosHoy = state.ingresos
-    .filter(i => String(i.fecha || '').slice(0, 10) === hoy)
+    .filter(i =>
+      String(i.fecha || '').slice(0, 10) === hoy &&
+      String(i.periodo || 'Periodo 1') === p
+    )
     .reduce((a, b) => a + Number(b.monto || 0), 0);
 
   const gastosHoy = state.gastos
-    .filter(g => String(g.fecha || '').slice(0, 10) === hoy)
+    .filter(g =>
+      String(g.fecha || '').slice(0, 10) === hoy &&
+      String(g.periodo || 'Periodo 1') === p
+    )
     .reduce((a, b) => a + Number(b.monto || 0), 0);
 
   return {
@@ -188,7 +194,12 @@ function renderGraficos() {
       type: 'line',
       data: {
         labels: labelsG,
-        datasets: [{ label: 'Gastos', data: labelsG.map(l => gastosDia[l]), borderColor: '#c23d3d', tension: 0.3 }]
+        datasets: [{
+          label: 'Gastos',
+          data: labelsG.map(l => gastosDia[l]),
+          borderColor: '#c23d3d',
+          tension: 0.3
+        }]
       },
       options: { responsive: true }
     });
@@ -220,7 +231,12 @@ function renderGraficos() {
       type: 'line',
       data: {
         labels: cerrados.map(p => p.id_periodo),
-        datasets: [{ label: 'Ganancia', data: cerrados.map(p => Number(p.ganancia || 0)), borderColor: '#156647', tension: 0.25 }]
+        datasets: [{
+          label: 'Ganancia',
+          data: cerrados.map(p => Number(p.ganancia || 0)),
+          borderColor: '#156647',
+          tension: 0.25
+        }]
       },
       options: { responsive: true }
     });
@@ -310,6 +326,7 @@ function renderTrabajadores() {
     el('prestamosHistorial').innerHTML = state.prestamos.map((p, i) => {
       const id = p.id || `pres-${i}`;
       const pagado = String(p.estado || '').toLowerCase() === 'pagado';
+
       return `<tr>
         <td>${p.fecha || ''}</td>
         <td>${p.trabajador || ''}</td>
@@ -347,11 +364,16 @@ async function cerrarPeriodo() {
     estado: 'cerrado'
   });
 
-  const numero = Number(String(t.p).replace(/\D/g, '')) || 1;
+  const numeros = state.periodos
+    .map(p => Number(String(p.id_periodo || '').replace(/\D/g, '')))
+    .filter(n => !isNaN(n));
+
+  const ultimoNumero = numeros.length ? Math.max(...numeros) : 1;
+  const nuevoPeriodo = `Periodo ${ultimoNumero + 1}`;
 
   await apiPost({
     hoja: 'PERIODOS',
-    id_periodo: `Periodo ${numero + 1}`,
+    id_periodo: nuevoPeriodo,
     fecha_inicio: todayISO(),
     fecha_fin: '',
     total_ingresos: 0,
@@ -360,7 +382,8 @@ async function cerrarPeriodo() {
     estado: 'activo'
   });
 
-  showToast('Período cerrado');
+  state.currentPeriodo = nuevoPeriodo;
+  showToast(`${t.p} cerrado. Nuevo: ${nuevoPeriodo}`);
   await cargarDatos();
 }
 
