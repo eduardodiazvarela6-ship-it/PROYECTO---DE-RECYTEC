@@ -1,67 +1,525 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>RECYTEC | Boletas HOiN</title>
-  <style>
-    body { margin: 0; font-family: Arial, sans-serif; background: #eef2f1; }
-    .wrap { max-width: 360px; margin: 1rem auto; background: #fff; border-radius: 12px; padding: 1rem; }
-    .ticket {
-      width: 58mm; margin: 0 auto; background: #fff; color: #000; padding: 2mm;
-      border: 1px dashed #bbb; font-size: 11px;
-    }
-    input, textarea, button { width: 100%; margin-bottom: .55rem; padding: .55rem; box-sizing: border-box; }
-    table { width: 100%; font-size: 10px; border-collapse: collapse; }
-    td { padding: 2px 0; }
-    .center { text-align: center; }
-    .right { text-align: right; }
-    @media print {
-      body { background: #fff; }
-      .no-print { display: none !important; }
-      .ticket { border: 0; width: 58mm; }
-    }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="theme-color" content="#0f6b4f" />
+<title>RECYTEC | Boletas HOiN POS-58</title>
+<style>
+  :root{
+    --bg:#eef3f4;
+    --card:#ffffff;
+    --line:#d9e2ec;
+    --text:#17252d;
+    --muted:#667985;
+    --primary:#16845f;
+    --primary-dark:#0f5f46;
+    --soft:#e8f7f0;
+    --danger:#c73b3b;
+    --danger-soft:#fee4e2;
+    --dark:#2d3f48;
+    --warning:#e8aa25;
+    --shadow:0 16px 40px rgba(20,38,44,.09);
+  }
+
+  *{box-sizing:border-box}
+
+  body{
+    margin:0;
+    font-family:Arial, Helvetica, sans-serif;
+    background:radial-gradient(circle at top left,#e6f7ef,#eef3f4 35%,#f7fafb);
+    color:var(--text);
+  }
+
+  .app{
+    max-width:1380px;
+    margin:0 auto;
+    padding:18px 16px 28px;
+  }
+
+  .topbar{
+    display:flex;
+    justify-content:space-between;
+    gap:14px;
+    align-items:center;
+    background:rgba(255,255,255,.9);
+    border:1px solid var(--line);
+    border-radius:24px;
+    padding:16px 18px;
+    box-shadow:var(--shadow);
+    margin-bottom:18px;
+  }
+
+  .brand{
+    display:flex;
+    align-items:center;
+    gap:12px;
+  }
+
+  .brand-mark{
+    width:50px;
+    height:50px;
+    border-radius:16px;
+    display:grid;
+    place-items:center;
+    background:linear-gradient(135deg,var(--primary),var(--primary-dark));
+    color:#fff;
+    font-size:24px;
+    font-weight:900;
+  }
+
+  .title{
+    margin:0;
+    font-size:26px;
+    font-weight:900;
+  }
+
+  .subtitle{
+    margin:4px 0 0;
+    color:var(--muted);
+    font-size:14px;
+  }
+
+  .top-actions{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+  }
+
+  .layout{
+    display:grid;
+    grid-template-columns:1.2fr .8fr;
+    gap:18px;
+    align-items:start;
+  }
+
+  .panel{
+    background:var(--card);
+    border-radius:24px;
+    border:1px solid var(--line);
+    box-shadow:var(--shadow);
+    padding:18px;
+  }
+
+  .preview-box{
+    position:sticky;
+    top:16px;
+  }
+
+  .section{
+    margin-top:18px;
+    padding-top:16px;
+    border-top:1px solid #edf1f6;
+  }
+
+  .section:first-child{
+    margin-top:0;
+    padding-top:0;
+    border-top:none;
+  }
+
+  .section-head{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-end;
+    gap:10px;
+    margin-bottom:12px;
+  }
+
+  .section h2{
+    margin:0;
+    font-size:18px;
+  }
+
+  .hint{
+    margin:6px 0 0;
+    color:var(--muted);
+    font-size:12px;
+  }
+
+  .grid2,.grid3,.grid4{
+    display:grid;
+    gap:12px;
+  }
+  .grid2{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .grid3{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .grid4{grid-template-columns:repeat(4,minmax(0,1fr))}
+
+  .field label{
+    display:block;
+    margin-bottom:6px;
+    font-size:12px;
+    font-weight:900;
+    color:#344054;
+  }
+
+  .field input,.field select,.field textarea{
+    width:100%;
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:12px 12px;
+    font:inherit;
+    outline:none;
+    background:#fff;
+  }
+
+  .field textarea{
+    min-height:78px;
+    resize:vertical;
+  }
+
+  .field input:focus,.field select:focus,.field textarea:focus{
+    border-color:#83d6c2;
+    box-shadow:0 0 0 4px rgba(22,132,95,.12);
+  }
+
+  .toolbar{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    margin-top:14px;
+  }
+
+  button,.btn-link{
+    border:none;
+    cursor:pointer;
+    border-radius:14px;
+    padding:12px 16px;
+    font-weight:900;
+    font-size:14px;
+    text-decoration:none;
+    display:inline-grid;
+    place-items:center;
+    transition:.18s ease;
+  }
+
+  button:hover,.btn-link:hover{
+    transform:translateY(-1px);
+    filter:brightness(.98);
+  }
+
+  .btn-primary{background:linear-gradient(135deg,var(--primary),var(--primary-dark));color:#fff}
+  .btn-soft{background:var(--soft);color:var(--primary-dark)}
+  .btn-dark{background:var(--dark);color:#fff}
+  .btn-warning{background:var(--warning);color:#1f2528}
+  .btn-danger{background:var(--danger-soft);color:var(--danger)}
+  .btn-mini{padding:9px 11px;min-width:42px}
+
+  .items-head,.item-row{
+    display:grid;
+    grid-template-columns:1.8fr .55fr .8fr .8fr .42fr;
+    gap:10px;
+    align-items:end;
+  }
+
+  .items-head{
+    font-size:12px;
+    color:var(--muted);
+    font-weight:900;
+    padding:0 2px 8px;
+  }
+
+  .item-row{
+    background:#fbfcfe;
+    border:1px solid #e8edf4;
+    border-radius:18px;
+    padding:10px;
+    margin-bottom:10px;
+  }
+
+  .history{
+    max-height:320px;
+    overflow:auto;
+    border:1px solid #edf1f6;
+    border-radius:18px;
+    padding:10px;
+    background:#fbfcfe;
+  }
+
+  .sale{
+    border:1px solid #e7ebf2;
+    border-radius:14px;
+    background:#fff;
+    padding:10px;
+    margin-bottom:10px;
+  }
+
+  .sale-top{
+    display:flex;
+    justify-content:space-between;
+    gap:10px;
+    align-items:center;
+    margin-bottom:6px;
+  }
+
+  .sale small{color:var(--muted)}
+
+  .preview-stage{
+    min-height:650px;
+    border-radius:20px;
+    padding:20px;
+    background:repeating-linear-gradient(45deg,#f2f4f7,#f2f4f7 12px,#eceff3 12px,#eceff3 24px);
+    display:flex;
+    justify-content:center;
+    align-items:flex-start;
+  }
+
+  #ticket{
+    width:168px;
+    margin:0 auto;
+    background:#fff;
+    color:#000;
+    font-family:"Courier New", monospace;
+    font-size:12px;
+    font-weight:600;
+    line-height:1.12;
+    padding:4px 2px 8px;
+    box-shadow:0 8px 20px rgba(0,0,0,.10);
+  }
+
+  .c{text-align:center}
+  .b{font-weight:900}
+  .small{font-size:10px}
+  .tiny{font-size:9px}
+  .big{font-size:26px;font-weight:900;line-height:1}
+  .sep{margin:5px 0;border-top:1px dashed #000}
+  .sp4{height:4px}
+  .sp6{height:6px}
+  .line{display:flex;justify-content:space-between;gap:6px;align-items:flex-start}
+  .left{flex:1;min-width:0;word-break:break-word}
+  .right{width:58px;white-space:nowrap;text-align:right}
+  .total{font-size:16px;font-weight:900}
+  .muted-ticket{opacity:.9}
+
+  @media (max-width:980px){
+    .layout{grid-template-columns:1fr}
+    .preview-box{position:static}
+    .grid2,.grid3,.grid4{grid-template-columns:1fr}
+    .items-head,.item-row{grid-template-columns:1fr 1fr}
+    .topbar{align-items:flex-start;flex-direction:column}
+    .top-actions{width:100%}
+    .top-actions button,.top-actions a{flex:1}
+  }
+
+  @page{size:58mm auto;margin:0}
+
+  @media print{
+    html,body{margin:0!important;padding:0!important;background:#fff!important;width:58mm;overflow:hidden}
+    .no-print{display:none!important}
+    .app{margin:0!important;padding:0!important;max-width:none!important}
+    .panel{box-shadow:none!important;border:none!important;border-radius:0!important;padding:0!important;margin:0!important;background:#fff!important}
+    .preview-stage{background:#fff!important;padding:0!important;min-height:auto!important;display:block!important;border-radius:0!important}
+    #ticket{width:46mm!important;margin:0 auto!important;padding:1mm 0 2mm!important;box-shadow:none!important;font-size:12px!important;font-weight:600!important;line-height:1.08!important}
+    .sep{border-top:1px dashed #000!important}
+  }
+</style>
 </head>
 <body>
-  <div class="wrap no-print">
-    <h2>Boletas HOiN (POS-58)</h2>
-    <input id="empresa" value="RECYTEC" placeholder="Empresa" />
-    <input id="ruc" placeholder="RUC" />
-    <input id="cliente" placeholder="Cliente" />
-    <textarea id="detalle" placeholder="Detalle (ej. Chatarra ferrosa x 10kg)"></textarea>
-    <input id="monto" type="number" step="0.01" placeholder="Monto total" />
-    <button onclick="generar()">Generar boleta</button>
-    <button onclick="window.print()">Imprimir</button>
-    <button onclick="location.href='index.html'">Volver al dashboard</button>
+<div class="app">
+  <div class="topbar no-print">
+    <div class="brand">
+      <div class="brand-mark">♻</div>
+      <div>
+        <h1 class="title">Boletas térmicas RECYTEC</h1>
+        <p class="subtitle">Generador profesional para impresora HOiN / POS-58. No se mezcla con caja ni dashboard.</p>
+      </div>
+    </div>
+    <div class="top-actions">
+      <a class="btn-link btn-dark" href="index.html">Volver al dashboard</a>
+      <button class="btn-primary" onclick="imprimir()">Imprimir</button>
+    </div>
   </div>
 
-  <section class="ticket" id="ticket">
-    <div class="center"><strong>RECYTEC</strong><br><span>BOLETA</span></div>
-    <hr>
-    <div>Fecha: <span id="tFecha"></span></div>
-    <div>Cliente: <span id="tCliente">-</span></div>
-    <div>RUC: <span id="tRuc">-</span></div>
-    <table>
-      <tr><td>Detalle</td><td class="right" id="tDetalle">-</td></tr>
-      <tr><td><strong>Total</strong></td><td class="right"><strong id="tTotal">S/ 0.00</strong></td></tr>
-    </table>
-    <hr>
-    <p class="center">Gracias por su preferencia</p>
-  </section>
+  <div class="layout">
+    <div class="panel no-print">
+      <div class="section">
+        <div class="section-head">
+          <div>
+            <h2>Datos de empresa</h2>
+            <p class="hint">Estos datos se guardan en este navegador para usar rápido.</p>
+          </div>
+        </div>
+        <div class="grid2">
+          <div class="field"><label>Empresa</label><input id="empresa" value="RECYTEC"></div>
+          <div class="field"><label>RUC</label><input id="ruc" value="20600000000"></div>
+          <div class="field"><label>Dirección</label><input id="direccion" value="Ate Vitarte - Lima"></div>
+          <div class="field"><label>Teléfono</label><input id="telefono" value="957494163"></div>
+        </div>
+      </div>
 
-  <script>
-    function generar() {
-      const hoy = new Date().toLocaleString('es-PE');
-      document.getElementById('tFecha').textContent = hoy;
-      document.getElementById('tCliente').textContent = document.getElementById('cliente').value || '-';
-      document.getElementById('tRuc').textContent = document.getElementById('ruc').value || '-';
-      document.getElementById('tDetalle').textContent = (document.getElementById('detalle').value || '-').slice(0, 48);
-      document.getElementById('tTotal').textContent = `S/ ${Number(document.getElementById('monto').value || 0).toFixed(2)}`;
-      const nombre = document.getElementById('empresa').value || 'RECYTEC';
-      document.querySelector('.ticket strong').textContent = nombre;
-    }
-    generar();
-  </script>
+      <div class="section">
+        <h2>Comprobante</h2>
+        <div class="grid4">
+          <div class="field"><label>Tipo</label><select id="tipo"><option>BOLETA DE VENTA</option><option>NOTA DE VENTA</option><option>TICKET</option><option>RECIBO INTERNO</option></select></div>
+          <div class="field"><label>Serie</label><input id="serie" value="B001"></div>
+          <div class="field"><label>Número</label><input id="numero" value="1"></div>
+          <div class="field"><label>Pago</label><select id="pago"><option>Efectivo</option><option>Yape</option><option>Plin</option><option>Transferencia</option><option>Tarjeta</option></select></div>
+          <div class="field"><label>Fecha</label><input id="fecha" type="date"></div>
+          <div class="field"><label>Hora</label><input id="hora" type="time"></div>
+          <div class="field"><label>Moneda</label><select id="moneda"><option value="S/">S/</option><option value="$">$</option></select></div>
+          <div class="field"><label>Mostrar IGV</label><select id="mostrarIgv"><option value="si">Sí</option><option value="no">No</option></select></div>
+        </div>
+      </div>
+
+      <div class="section">
+        <h2>Cliente</h2>
+        <div class="grid2">
+          <div class="field"><label>Nombre</label><input id="cliente" value="CLIENTE VARIOS"></div>
+          <div class="field"><label>DNI / RUC</label><input id="docCliente" value="-"></div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-head">
+          <div>
+            <h2>Productos</h2>
+            <p class="hint">Puedes agregar varios productos. El importe se calcula automático.</p>
+          </div>
+          <button class="btn-soft" onclick="agregarItem()">+ Producto</button>
+        </div>
+        <div class="items-head"><div>Descripción</div><div>Cant.</div><div>P. Unit</div><div>Importe</div><div></div></div>
+        <div id="items"></div>
+        <div class="toolbar"><button class="btn-soft" onclick="cargarDemo()">Ejemplo rápido</button><button class="btn-danger" onclick="limpiarProductos()">Limpiar productos</button></div>
+      </div>
+
+      <div class="section">
+        <h2>Totales</h2>
+        <div class="grid3">
+          <div class="field"><label>Descuento</label><input id="descuento" type="number" min="0" step="0.01" value="0"></div>
+          <div class="field"><label>Recibido</label><input id="recibido" type="number" min="0" step="0.01" value="0"></div>
+          <div class="field"><label>Precio incluye IGV</label><select id="incluyeIgv"><option value="si">Sí</option><option value="no">No</option></select></div>
+        </div>
+        <div class="field" style="margin-top:12px;"><label>Mensaje final</label><textarea id="mensajeFinal">Gracias por su compra.
+RECYTEC - reciclaje responsable.</textarea></div>
+        <div class="toolbar">
+          <button class="btn-primary" onclick="actualizarVista()">Actualizar vista</button>
+          <button class="btn-primary" onclick="imprimir()">Imprimir</button>
+          <button class="btn-dark" onclick="guardarVenta()">Guardar venta</button>
+          <button class="btn-soft" onclick="nuevaVenta()">Nueva venta</button>
+          <button class="btn-danger" onclick="borrarHistorial()">Borrar historial</button>
+        </div>
+        <div class="hint">Impresión recomendada: POS-58, papel 58mm, escala 100%, márgenes ninguno.</div>
+      </div>
+
+      <div class="section">
+        <h2>Historial local</h2>
+        <div id="history" class="history"></div>
+      </div>
+    </div>
+
+    <div class="panel preview-box">
+      <div class="section">
+        <h2 class="no-print">Vista previa</h2>
+        <div class="preview-stage"><div id="ticket"></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const itemsDiv = document.getElementById('items');
+const historyDiv = document.getElementById('history');
+const STORAGE_KEY = 'recytec_boletas_hoin_pro_v2';
+const CONFIG_KEY = 'recytec_boletas_config_v2';
+
+function nowDate(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`}
+function nowTime(){const d=new Date();return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`}
+function escapeHtml(s){return String(s ?? '').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;')}
+function money(n){return Number(n || 0).toFixed(2)}
+function numeroComprobante(){const serie=document.getElementById('serie').value.trim()||'B001';const numero=String(document.getElementById('numero').value||'1').padStart(6,'0');return `${serie}-${numero}`}
+
+function guardarConfig(){
+  const ids=['empresa','ruc','direccion','telefono','serie','moneda','mostrarIgv','incluyeIgv','mensajeFinal'];
+  const data={}; ids.forEach(id=>data[id]=document.getElementById(id).value);
+  localStorage.setItem(CONFIG_KEY,JSON.stringify(data));
+}
+function cargarConfig(){
+  try{const data=JSON.parse(localStorage.getItem(CONFIG_KEY)||'{}');Object.keys(data).forEach(id=>{if(document.getElementById(id))document.getElementById(id).value=data[id]})}catch(e){}
+}
+
+function agregarItem(desc='Producto', cant='1', precio='0.00'){
+  const row=document.createElement('div'); row.className='item-row';
+  row.innerHTML=`
+    <div class="field"><label>Descripción</label><input class="d" value="${escapeHtml(desc)}"></div>
+    <div class="field"><label>Cant.</label><input class="c" type="number" min="0" step="0.01" value="${cant}"></div>
+    <div class="field"><label>P. Unit</label><input class="p" type="number" min="0" step="0.01" value="${precio}"></div>
+    <div class="field"><label>Importe</label><input class="i" value="0.00" readonly></div>
+    <div class="field"><label>&nbsp;</label><button class="btn-dark btn-mini" onclick="this.closest('.item-row').remove(); actualizarVista();">X</button></div>`;
+  itemsDiv.appendChild(row);
+  row.querySelectorAll('.d,.c,.p').forEach(el=>el.addEventListener('input',actualizarVista));
+  actualizarVista();
+}
+function limpiarProductos(){itemsDiv.innerHTML='';actualizarVista()}
+function getItems(){return [...document.querySelectorAll('.item-row')].map(r=>{const descripcion=r.querySelector('.d').value.trim()||'Producto';const cantidad=parseFloat(r.querySelector('.c').value||0);const precio=parseFloat(r.querySelector('.p').value||0);const importe=cantidad*precio;r.querySelector('.i').value=money(importe);return{descripcion,cantidad,precio,importe}}).filter(x=>x.descripcion||x.cantidad||x.precio)}
+
+function numeroALetras(n){
+  n=Number(n||0).toFixed(2); const [ent,dec]=n.split('.'); const num=parseInt(ent,10);
+  const u=['','UNO','DOS','TRES','CUATRO','CINCO','SEIS','SIETE','OCHO','NUEVE'];
+  const d10=['DIEZ','ONCE','DOCE','TRECE','CATORCE','QUINCE','DIECISEIS','DIECISIETE','DIECIOCHO','DIECINUEVE'];
+  const d=['','','VEINTE','TREINTA','CUARENTA','CINCUENTA','SESENTA','SETENTA','OCHENTA','NOVENTA'];
+  const c=['','CIENTO','DOSCIENTOS','TRESCIENTOS','CUATROCIENTOS','QUINIENTOS','SEISCIENTOS','SETECIENTOS','OCHOCIENTOS','NOVECIENTOS'];
+  function t999(n){if(n===0)return'';if(n===100)return'CIEN';if(n<10)return u[n];if(n<20)return d10[n-10];if(n<30)return n===20?'VEINTE':('VEINTI'+u[n-20].toLowerCase()).toUpperCase();if(n<100){const de=Math.floor(n/10),un=n%10;return d[de]+(un?' Y '+u[un]:'')}const ce=Math.floor(n/100),re=n%100;return c[ce]+(re?' '+t999(re):'')}
+  function tMiles(n){if(n<1000)return t999(n);const mil=Math.floor(n/1000),re=n%1000;const a=mil===1?'MIL':t999(mil)+' MIL';return a+(re?' '+t999(re):'')}
+  function tMill(n){if(n<1000000)return tMiles(n);const mi=Math.floor(n/1000000),re=n%1000000;const a=mi===1?'UN MILLON':tMiles(mi)+' MILLONES';return a+(re?' '+tMiles(re):'')}
+  return `${tMill(num)||'CERO'} CON ${dec}/100`;
+}
+
+function leerFormulario(){
+  const empresa=document.getElementById('empresa').value.trim()||'RECYTEC';
+  const ruc=document.getElementById('ruc').value.trim()||'-';
+  const direccion=document.getElementById('direccion').value.trim()||'-';
+  const telefono=document.getElementById('telefono').value.trim()||'-';
+  const tipo=document.getElementById('tipo').value; const comprobante=numeroComprobante();
+  const fecha=document.getElementById('fecha').value||nowDate(); const hora=document.getElementById('hora').value||nowTime();
+  const pago=document.getElementById('pago').value; const moneda=document.getElementById('moneda').value;
+  const mostrarIgv=document.getElementById('mostrarIgv').value==='si';
+  const cliente=document.getElementById('cliente').value.trim()||'CLIENTE VARIOS';
+  const docCliente=document.getElementById('docCliente').value.trim()||'-';
+  const descuento=parseFloat(document.getElementById('descuento').value||0);
+  const recibido=parseFloat(document.getElementById('recibido').value||0);
+  const incluyeIgv=document.getElementById('incluyeIgv').value==='si';
+  const mensajeFinal=document.getElementById('mensajeFinal').value.trim(); const items=getItems();
+  const bruto=items.reduce((a,b)=>a+b.importe,0); const base=Math.max(0,bruto-descuento);
+  let op=base,igv=0,total=base; if(incluyeIgv){op=base/1.18;igv=base-op;total=base}else{op=base;igv=op*.18;total=op+igv}
+  const vuelto=Math.max(0,recibido-total);
+  return{empresa,ruc,direccion,telefono,tipo,comprobante,fecha,hora,pago,moneda,mostrarIgv,cliente,docCliente,descuento,recibido,incluyeIgv,mensajeFinal,items,bruto,op,igv,total,vuelto};
+}
+
+function actualizarVista(){
+  guardarConfig(); const d=leerFormulario();
+  const itemsHtml=d.items.map(it=>`<div class="b">${escapeHtml(it.descripcion)}</div><div class="line"><div class="left">${it.cantidad} x ${d.moneda}${money(it.precio)}</div><div class="right">${d.moneda}${money(it.importe)}</div></div><div class="sp4"></div>`).join('')||'<div class="c">Sin productos</div>';
+  document.getElementById('ticket').innerHTML=`
+    <div class="c big">${escapeHtml(d.empresa)}</div>
+    <div class="c small">COMPRA Y VENTA</div>
+    <div class="c small">RUC: ${escapeHtml(d.ruc)}</div>
+    <div class="c small">${escapeHtml(d.direccion)}</div>
+    <div class="c small">Tel: ${escapeHtml(d.telefono)}</div>
+    <div class="sp6"></div><div class="c b">${escapeHtml(d.tipo)}</div><div class="c b">${escapeHtml(d.comprobante)}</div><div class="sep"></div>
+    <div class="line"><div class="left">Fecha:</div><div class="right">${escapeHtml(d.fecha)}</div></div>
+    <div class="line"><div class="left">Hora:</div><div class="right">${escapeHtml(d.hora)}</div></div>
+    <div class="line"><div class="left">Pago:</div><div class="right">${escapeHtml(d.pago)}</div></div><div class="sep"></div>
+    <div class="c b">CLIENTE</div><div class="sep"></div><div>Cliente: ${escapeHtml(d.cliente)}</div><div>Doc: ${escapeHtml(d.docCliente)}</div><div class="sep"></div>
+    <div class="c b">DETALLE</div><div class="sep"></div>${itemsHtml}<div class="sep"></div>
+    <div class="line"><div class="left">Subtotal</div><div class="right">${d.moneda}${money(d.bruto)}</div></div>
+    <div class="line"><div class="left">Descuento</div><div class="right">${d.moneda}${money(d.descuento)}</div></div>
+    ${d.mostrarIgv?`<div class="line"><div class="left">Op. gravada</div><div class="right">${d.moneda}${money(d.op)}</div></div><div class="line"><div class="left">IGV</div><div class="right">${d.moneda}${money(d.igv)}</div></div>`:''}
+    <div class="sep"></div><div class="line total"><div class="left">TOTAL</div><div class="right">${d.moneda}${money(d.total)}</div></div>
+    <div class="line"><div class="left">Recibido</div><div class="right">${d.moneda}${money(d.recibido)}</div></div><div class="line"><div class="left">Vuelto</div><div class="right">${d.moneda}${money(d.vuelto)}</div></div><div class="sep"></div>
+    <div class="small">SON: ${numeroALetras(d.total)} ${d.moneda==='S/'?'SOLES':'DOLARES'}</div><div class="sp6"></div>
+    <div class="c small">${escapeHtml(d.mensajeFinal).replace(/\n/g,'<br>')}</div><div class="sp6"></div><div class="c tiny muted-ticket">RECYTEC</div>`;
+}
+function imprimir(){actualizarVista();window.print()}
+function cargarDemo(){itemsDiv.innerHTML='';agregarItem('Carton reciclado','10','1.20');agregarItem('Plastico PET','6','2.30');agregarItem('Chatarra liviana','3','4.50');document.getElementById('cliente').value='CLIENTE MOSTRADOR';document.getElementById('docCliente').value='-';document.getElementById('recibido').value='50';actualizarVista()}
+function nuevaVenta(){document.getElementById('cliente').value='CLIENTE VARIOS';document.getElementById('docCliente').value='-';document.getElementById('descuento').value='0';document.getElementById('recibido').value='0';itemsDiv.innerHTML='';agregarItem('Producto','1','0.00');document.getElementById('numero').value=String((parseInt(document.getElementById('numero').value||'1',10)||1)+1);actualizarVista()}
+function getHistorial(){try{return JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]')}catch(e){return[]}}
+function setHistorial(arr){localStorage.setItem(STORAGE_KEY,JSON.stringify(arr))}
+function guardarVenta(){const d=leerFormulario();if(!d.items.length){alert('Agrega al menos un producto.');return}const historial=getHistorial();historial.unshift({id:Date.now(),comprobante:d.comprobante,fecha:d.fecha,hora:d.hora,cliente:d.cliente,total:d.total,moneda:d.moneda,data:d});setHistorial(historial.slice(0,100));renderHistorial();alert('Venta guardada correctamente.')}
+function cargarVenta(id){const x=getHistorial().find(v=>v.id===id);if(!x)return;const d=x.data;['empresa','ruc','direccion','telefono','tipo','fecha','hora','pago','moneda','cliente','docCliente','descuento','recibido','mensajeFinal'].forEach(k=>{if(document.getElementById(k))document.getElementById(k).value=d[k]});const [serie,num]=d.comprobante.split('-');document.getElementById('serie').value=serie||'B001';document.getElementById('numero').value=parseInt(num||'1',10);document.getElementById('mostrarIgv').value=d.mostrarIgv?'si':'no';document.getElementById('incluyeIgv').value=d.incluyeIgv?'si':'no';itemsDiv.innerHTML='';d.items.forEach(it=>agregarItem(it.descripcion,it.cantidad,it.precio));actualizarVista()}
+function eliminarVenta(id){setHistorial(getHistorial().filter(x=>x.id!==id));renderHistorial()}
+function borrarHistorial(){if(!confirm('¿Seguro que deseas borrar todo el historial?'))return;localStorage.removeItem(STORAGE_KEY);renderHistorial()}
+function renderHistorial(){const historial=getHistorial();if(!historial.length){historyDiv.innerHTML='<div class="hint">Aún no hay ventas guardadas.</div>';return}historyDiv.innerHTML=historial.map(x=>`<div class="sale"><div class="sale-top"><div><div class="b">${escapeHtml(x.comprobante)}</div><small>${escapeHtml(x.fecha)} ${escapeHtml(x.hora)} · ${escapeHtml(x.cliente)}</small></div><div class="b">${escapeHtml(x.moneda)}${money(x.total)}</div></div><div class="toolbar" style="margin-top:0;"><button class="btn-soft btn-mini" onclick="cargarVenta(${x.id})">Cargar</button><button class="btn-danger btn-mini" onclick="eliminarVenta(${x.id})">Eliminar</button></div></div>`).join('')}
+function init(){cargarConfig();document.getElementById('fecha').value=nowDate();document.getElementById('hora').value=nowTime();['empresa','ruc','direccion','telefono','tipo','serie','numero','pago','fecha','hora','moneda','mostrarIgv','cliente','docCliente','descuento','recibido','incluyeIgv','mensajeFinal'].forEach(id=>document.getElementById(id).addEventListener('input',actualizarVista));agregarItem('Producto','1','0.00');renderHistorial();actualizarVista()}
+init();
+</script>
 </body>
 </html>
