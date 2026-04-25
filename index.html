@@ -3,197 +3,450 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>RECYTEC | Dashboard Administrativo</title>
+  <meta name="theme-color" content="#0f6b4f" />
+  <title>RECYTEC | Sistema Administrativo</title>
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
   <link rel="stylesheet" href="styles.css" />
+
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 </head>
+
 <body>
   <div id="toast" class="toast" role="alert" aria-live="polite"></div>
-  <div id="spinner" class="spinner-overlay hidden">
+
+  <div id="spinner" class="spinner-overlay hidden" aria-hidden="true">
     <div class="spinner-card">
       <div class="spinner"></div>
       <p>Procesando...</p>
     </div>
   </div>
 
-  <main id="loginView" class="view">
+  <main id="loginView" class="auth-page view">
     <section class="login-card">
-      <h1>RECYTEC</h1>
-      <p class="subtitle">Sistema administrativo empresarial</p>
-      <form id="loginForm" autocomplete="off">
-        <label>Usuario</label>
-        <input id="username" type="text" required placeholder="Ingresa tu usuario" />
-        <label>Contraseña</label>
-        <input id="password" type="password" required placeholder="Ingresa tu contraseña" />
-        <button class="btn btn-primary" type="submit">Iniciar sesión</button>
+      <div class="login-brand">
+        <div class="brand-mark">♻</div>
+        <div>
+          <h1>RECYTEC</h1>
+          <p>Sistema administrativo empresarial</p>
+        </div>
+      </div>
+
+      <div class="login-copy">
+        <h2>Acceso privado</h2>
+        <p>Controla ingresos, gastos, períodos, trabajadores y reportes desde un solo panel.</p>
+      </div>
+
+      <form id="loginForm" class="auth-form" autocomplete="off">
+        <div class="field">
+          <label for="username">Usuario</label>
+          <input id="username" type="text" required placeholder="Ingresa tu usuario" />
+        </div>
+
+        <div class="field">
+          <label for="password">Contraseña</label>
+          <input id="password" type="password" required placeholder="Ingresa tu contraseña" />
+        </div>
+
+        <button class="btn btn-primary btn-full" type="submit">Ingresar al sistema</button>
       </form>
+
+      <p class="secure-note">Datos conectados a Google Sheets mediante Apps Script.</p>
     </section>
   </main>
 
-  <div id="appView" class="hidden">
-    <header class="topbar">
-      <div>
-        <h2>Dashboard RECYTEC</h2>
-        <p id="periodInfo" class="muted"></p>
-      </div>
-      <button id="logoutBtn" class="btn btn-danger">Cerrar sesión</button>
-    </header>
-
-    <nav class="tab-nav" id="tabNav">
-      <button class="tab-btn active" data-tab="dashboardTab">Dashboard</button>
-      <button class="tab-btn" data-tab="ingresosTab">Ingresos</button>
-      <button class="tab-btn" data-tab="gastosTab">Gastos</button>
-      <button class="tab-btn" data-tab="trabajadoresTab">Trabajadores</button>
-      <button class="tab-btn" data-tab="historialTab">Historial</button>
-      <button class="tab-btn" data-tab="exportarTab">Exportar</button>
-    </nav>
-
-    <section id="dashboardTab" class="tab-content active">
-      <div class="kpi-grid">
-        <article class="card kpi"><h3>Ingresos período</h3><p id="kpiIngresos">S/ 0.00</p></article>
-        <article class="card kpi"><h3>Gastos período</h3><p id="kpiGastos">S/ 0.00</p></article>
-        <article class="card kpi"><h3>Ganancia actual</h3><p id="kpiGanancia">S/ 0.00</p></article>
-        <article class="card kpi"><h3>Ingresos hoy</h3><p id="kpiIngresosHoy">S/ 0.00</p></article>
-        <article class="card kpi"><h3>Gastos hoy</h3><p id="kpiGastosHoy">S/ 0.00</p></article>
-      </div>
-
-      <div class="actions-grid">
-        <button class="btn btn-primary action" data-go-tab="ingresosTab">Registrar ingreso</button>
-        <button class="btn btn-primary action" data-go-tab="gastosTab">Registrar gasto</button>
-        <button class="btn btn-primary action" data-go-tab="trabajadoresTab">Trabajadores</button>
-        <a class="btn btn-secondary action" href="boletas.html">Boletas HOiN</a>
-        <button id="cerrarPeriodoBtn" class="btn btn-warning action">Cerrar período</button>
-        <button class="btn btn-secondary action" data-go-tab="exportarTab">Exportar reporte</button>
-      </div>
-
-      <div class="chart-grid">
-        <article class="card"><h3>Gastos por día</h3><canvas id="chartGastosDia"></canvas></article>
-        <article class="card"><h3>Ingresos vs gastos</h3><canvas id="chartIngresosGastos"></canvas></article>
-        <article class="card"><h3>Evolución períodos cerrados</h3><canvas id="chartPeriodos"></canvas></article>
-      </div>
-    </section>
-
-    <section id="ingresosTab" class="tab-content">
-      <article class="card">
-        <h3>Registrar ingreso</h3>
-        <form id="ingresoForm" class="form-grid">
-          <input name="descripcion" placeholder="Descripción" required />
-          <input name="monto" type="number" min="0.01" step="0.01" placeholder="Monto" required />
-          <select name="metodo_pago">
-            <option value="efectivo">Efectivo</option>
-            <option value="Yape">Yape</option>
-            <option value="Plin">Plin</option>
-            <option value="transferencia">Transferencia</option>
-            <option value="otro">Otro</option>
-          </select>
-          <button class="btn btn-primary" type="submit">Guardar ingreso</button>
-        </form>
-      </article>
-    </section>
-
-    <section id="gastosTab" class="tab-content">
-      <article class="card">
-        <h3>Registrar gasto</h3>
-        <form id="gastoForm" class="form-grid">
-          <input name="descripcion" placeholder="Descripción" required />
-          <input name="monto" type="number" min="0.01" step="0.01" placeholder="Monto" required />
-          <button class="btn btn-primary" type="submit">Guardar gasto</button>
-        </form>
-      </article>
-    </section>
-
-    <section id="trabajadoresTab" class="tab-content">
-      <div class="split-grid">
-        <article class="card">
-          <h3>Adelantos</h3>
-          <form id="adelantoForm" class="form-grid">
-            <input name="trabajador" placeholder="Trabajador" required />
-            <input name="descripcion" placeholder="Descripción" required />
-            <input name="monto" type="number" min="0.01" step="0.01" placeholder="Monto" required />
-            <button class="btn btn-primary" type="submit">Guardar adelanto</button>
-          </form>
-        </article>
-        <article class="card">
-          <h3>Préstamos</h3>
-          <form id="prestamoForm" class="form-grid">
-            <input name="trabajador" placeholder="Trabajador" required />
-            <input name="descripcion" placeholder="Descripción" required />
-            <input name="monto" type="number" min="0.01" step="0.01" placeholder="Monto" required />
-            <select name="estado">
-              <option value="pendiente">Pendiente</option>
-              <option value="pagado">Pagado</option>
-            </select>
-            <button class="btn btn-primary" type="submit">Guardar préstamo</button>
-          </form>
-        </article>
-      </div>
-
-      <div class="split-grid">
-        <article class="card">
-          <h3>Total adelantado por trabajador</h3>
-          <div id="adelantosResumen"></div>
-        </article>
-        <article class="card">
-          <h3>Deuda pendiente por trabajador</h3>
-          <div id="prestamosResumen"></div>
-        </article>
-      </div>
-
-      <article class="card">
-        <h3>Historial de préstamos</h3>
-        <div class="table-wrap">
-          <table>
-            <thead><tr><th>Fecha</th><th>Trabajador</th><th>Descripción</th><th>Monto</th><th>Estado</th><th>Acción</th></tr></thead>
-            <tbody id="prestamosHistorial"></tbody>
-          </table>
+  <div id="appView" class="hidden app-shell">
+    <aside class="sidebar">
+      <div class="sidebar-brand">
+        <div class="brand-mark small">♻</div>
+        <div>
+          <strong>RECYTEC</strong>
+          <span>Panel administrativo</span>
         </div>
-      </article>
-    </section>
+      </div>
 
-    <section id="historialTab" class="tab-content">
-      <article class="card">
-        <h3>Ingresos del período actual</h3>
-        <div class="table-wrap"><table><thead><tr><th>Fecha</th><th>Descripción</th><th>Monto</th><th>Método</th><th>Acciones</th></tr></thead><tbody id="tablaIngresos"></tbody></table></div>
-      </article>
-      <article class="card">
-        <h3>Gastos del período actual</h3>
-        <div class="table-wrap"><table><thead><tr><th>Fecha</th><th>Descripción</th><th>Monto</th><th>Acciones</th></tr></thead><tbody id="tablaGastos"></tbody></table></div>
-      </article>
-      <article class="card">
-        <h3>Períodos cerrados</h3>
-        <div class="table-wrap"><table><thead><tr><th>Período</th><th>Inicio</th><th>Fin</th><th>Ingresos</th><th>Gastos</th><th>Ganancia</th><th>Estado</th><th>Acciones</th></tr></thead><tbody id="tablaPeriodos"></tbody></table></div>
-      </article>
-    </section>
+      <nav class="side-nav" aria-label="Navegación principal">
+        <button class="tab-btn active" data-tab="dashboardTab">Dashboard</button>
+        <button class="tab-btn" data-tab="ingresosTab">Ingresos</button>
+        <button class="tab-btn" data-tab="gastosTab">Gastos</button>
+        <button class="tab-btn" data-tab="trabajadoresTab">Trabajadores</button>
+        <button class="tab-btn" data-tab="historialTab">Historial</button>
+        <button class="tab-btn" data-tab="exportarTab">Exportar</button>
+      </nav>
 
-    <section id="exportarTab" class="tab-content">
-      <article class="card">
-        <h3>Exportación de reportes</h3>
+      <a class="btn btn-dark btn-full" href="boletas.html">Boletas HOiN</a>
+    </aside>
+
+    <main class="main-panel">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">Panel de control</p>
+          <h2>Dashboard RECYTEC</h2>
+          <p id="periodInfo" class="muted">Período activo: Periodo 1</p>
+        </div>
+
+        <div class="topbar-actions">
+          <button class="btn btn-secondary" data-go-tab="exportarTab">Exportar</button>
+          <button id="logoutBtn" class="btn btn-danger">Cerrar sesión</button>
+        </div>
+      </header>
+
+      <nav class="mobile-tab-nav" id="tabNav" aria-label="Navegación móvil">
+        <button class="tab-btn active" data-tab="dashboardTab">Dashboard</button>
+        <button class="tab-btn" data-tab="ingresosTab">Ingresos</button>
+        <button class="tab-btn" data-tab="gastosTab">Gastos</button>
+        <button class="tab-btn" data-tab="trabajadoresTab">Trabajadores</button>
+        <button class="tab-btn" data-tab="historialTab">Historial</button>
+        <button class="tab-btn" data-tab="exportarTab">Exportar</button>
+      </nav>
+
+      <section id="dashboardTab" class="tab-content active">
+        <div class="hero-card">
+          <div>
+            <p class="eyebrow">Resumen operativo</p>
+            <h3>Control de caja por período</h3>
+            <p>Registra movimientos diarios, revisa la ganancia del ciclo y cierra períodos sin mezclar datos.</p>
+          </div>
+          <div class="hero-actions">
+            <button class="btn btn-primary" data-go-tab="ingresosTab">+ Ingreso</button>
+            <button class="btn btn-outline" data-go-tab="gastosTab">+ Gasto</button>
+          </div>
+        </div>
+
+        <div class="kpi-grid">
+          <article class="card kpi kpi-income">
+            <span class="kpi-icon">S/</span>
+            <h3>Ingresos período</h3>
+            <p id="kpiIngresos">S/ 0.00</p>
+          </article>
+
+          <article class="card kpi kpi-expense">
+            <span class="kpi-icon">−</span>
+            <h3>Gastos período</h3>
+            <p id="kpiGastos">S/ 0.00</p>
+          </article>
+
+          <article class="card kpi kpi-profit">
+            <span class="kpi-icon">%</span>
+            <h3>Ganancia actual</h3>
+            <p id="kpiGanancia">S/ 0.00</p>
+          </article>
+
+          <article class="card kpi">
+            <span class="kpi-icon">↗</span>
+            <h3>Ingresos hoy</h3>
+            <p id="kpiIngresosHoy">S/ 0.00</p>
+          </article>
+
+          <article class="card kpi">
+            <span class="kpi-icon">↘</span>
+            <h3>Gastos hoy</h3>
+            <p id="kpiGastosHoy">S/ 0.00</p>
+          </article>
+        </div>
+
+        <div class="actions-grid">
+          <button class="btn btn-primary action" data-go-tab="ingresosTab">Registrar ingreso</button>
+          <button class="btn btn-primary action" data-go-tab="gastosTab">Registrar gasto</button>
+          <button class="btn btn-primary action" data-go-tab="trabajadoresTab">Trabajadores</button>
+          <a class="btn btn-dark action" href="boletas.html">Boletas HOiN</a>
+          <button id="cerrarPeriodoBtn" class="btn btn-warning action">Cerrar período</button>
+          <button class="btn btn-secondary action" data-go-tab="exportarTab">Exportar reporte</button>
+        </div>
+
+        <div class="chart-grid">
+          <article class="card chart-card">
+            <div class="card-head">
+              <div>
+                <h3>Gastos por día</h3>
+                <p class="muted">Movimientos del período actual</p>
+              </div>
+            </div>
+            <canvas id="chartGastosDia"></canvas>
+          </article>
+
+          <article class="card chart-card">
+            <div class="card-head">
+              <div>
+                <h3>Ingresos vs gastos</h3>
+                <p class="muted">Comparativo del ciclo activo</p>
+              </div>
+            </div>
+            <canvas id="chartIngresosGastos"></canvas>
+          </article>
+
+          <article class="card chart-card">
+            <div class="card-head">
+              <div>
+                <h3>Evolución períodos</h3>
+                <p class="muted">Ganancia por período cerrado</p>
+              </div>
+            </div>
+            <canvas id="chartPeriodos"></canvas>
+          </article>
+        </div>
+      </section>
+
+      <section id="ingresosTab" class="tab-content">
+        <article class="card form-card wide-card">
+          <div class="card-head">
+            <div>
+              <p class="eyebrow">Caja</p>
+              <h3>Registrar ingreso</h3>
+              <p class="muted">Registra ventas o entradas de dinero. El período se asigna automáticamente.</p>
+            </div>
+          </div>
+
+          <form id="ingresoForm" class="form-grid pro-form">
+            <div class="field field-wide">
+              <label>Descripción</label>
+              <input name="descripcion" placeholder="Ejemplo: venta de botellas, metales o aluminio" required />
+            </div>
+
+            <div class="field">
+              <label>Monto</label>
+              <input name="monto" type="number" min="0.01" step="0.01" placeholder="S/ 0.00" required />
+            </div>
+
+            <div class="field">
+              <label>Método de pago</label>
+              <select name="metodo_pago">
+                <option value="efectivo">Efectivo</option>
+                <option value="Yape">Yape</option>
+                <option value="Plin">Plin</option>
+                <option value="transferencia">Transferencia</option>
+                <option value="otro">Otro</option>
+              </select>
+            </div>
+
+            <button class="btn btn-primary btn-form" type="submit">Guardar ingreso</button>
+          </form>
+        </article>
+      </section>
+
+      <section id="gastosTab" class="tab-content">
+        <article class="card form-card wide-card">
+          <div class="card-head">
+            <div>
+              <p class="eyebrow">Caja</p>
+              <h3>Registrar gasto</h3>
+              <p class="muted">Registra capital, compras, combustible, transporte u otros gastos.</p>
+            </div>
+          </div>
+
+          <form id="gastoForm" class="form-grid pro-form">
+            <div class="field field-wide">
+              <label>Descripción</label>
+              <input name="descripcion" placeholder="Ejemplo: compra de botellas, capital, combustible" required />
+            </div>
+
+            <div class="field">
+              <label>Monto</label>
+              <input name="monto" type="number" min="0.01" step="0.01" placeholder="S/ 0.00" required />
+            </div>
+
+            <button class="btn btn-primary btn-form" type="submit">Guardar gasto</button>
+          </form>
+        </article>
+      </section>
+
+      <section id="trabajadoresTab" class="tab-content">
+        <div class="section-title">
+          <p class="eyebrow">Módulo independiente</p>
+          <h3>Trabajadores</h3>
+          <p class="muted">Los adelantos y préstamos no se mezclan con caja de ingresos/gastos.</p>
+        </div>
+
         <div class="split-grid">
-          <div>
-            <label>Selecciona módulo</label>
-            <select id="exportType">
-              <option value="INGRESOS">Ingresos</option>
-              <option value="GASTOS">Gastos</option>
-              <option value="ADELANTOS">Adelantos</option>
-              <option value="PRESTAMOS">Préstamos</option>
-              <option value="PERIODOS">Períodos</option>
-            </select>
-          </div>
-          <div>
-            <label>Período</label>
-            <select id="exportPeriodo"></select>
-          </div>
+          <article class="card form-card">
+            <h3>Adelantos</h3>
+            <form id="adelantoForm" class="form-grid">
+              <div class="field">
+                <label>Trabajador</label>
+                <input name="trabajador" placeholder="Nombre del trabajador" required />
+              </div>
+              <div class="field">
+                <label>Descripción</label>
+                <input name="descripcion" placeholder="Ejemplo: adelanto semanal" required />
+              </div>
+              <div class="field">
+                <label>Monto</label>
+                <input name="monto" type="number" min="0.01" step="0.01" placeholder="S/ 0.00" required />
+              </div>
+              <button class="btn btn-primary" type="submit">Guardar adelanto</button>
+            </form>
+          </article>
+
+          <article class="card form-card">
+            <h3>Préstamos</h3>
+            <form id="prestamoForm" class="form-grid">
+              <div class="field">
+                <label>Trabajador</label>
+                <input name="trabajador" placeholder="Nombre del trabajador" required />
+              </div>
+              <div class="field">
+                <label>Descripción</label>
+                <input name="descripcion" placeholder="Ejemplo: préstamo personal" required />
+              </div>
+              <div class="field">
+                <label>Monto</label>
+                <input name="monto" type="number" min="0.01" step="0.01" placeholder="S/ 0.00" required />
+              </div>
+              <div class="field">
+                <label>Estado</label>
+                <select name="estado">
+                  <option value="pendiente">Pendiente</option>
+                  <option value="pagado">Pagado</option>
+                </select>
+              </div>
+              <button class="btn btn-primary" type="submit">Guardar préstamo</button>
+            </form>
+          </article>
         </div>
-        <div class="actions-grid single-row">
-          <button id="btnExportCsv" class="btn btn-secondary">Exportar CSV</button>
-          <button id="btnExportPdf" class="btn btn-warning">Exportar PDF</button>
+
+        <div class="split-grid">
+          <article class="card summary-card">
+            <h3>Total adelantado por trabajador</h3>
+            <div id="adelantosResumen" class="summary-list"></div>
+          </article>
+
+          <article class="card summary-card">
+            <h3>Deuda pendiente por trabajador</h3>
+            <div id="prestamosResumen" class="summary-list"></div>
+          </article>
         </div>
-      </article>
-    </section>
+
+        <article class="card">
+          <div class="card-head">
+            <h3>Historial de préstamos</h3>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Fecha</th>
+                  <th>Trabajador</th>
+                  <th>Descripción</th>
+                  <th>Monto</th>
+                  <th>Estado</th>
+                  <th>Acción</th>
+                </tr>
+              </thead>
+              <tbody id="prestamosHistorial"></tbody>
+            </table>
+          </div>
+        </article>
+      </section>
+
+      <section id="historialTab" class="tab-content">
+        <div class="section-title">
+          <p class="eyebrow">Control y corrección</p>
+          <h3>Historial del sistema</h3>
+          <p class="muted">Edita o elimina registros cuando necesites corregir descuentos, montos o períodos.</p>
+        </div>
+
+        <article class="card">
+          <div class="card-head">
+            <h3>Ingresos del período actual</h3>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Fecha</th>
+                  <th>Descripción</th>
+                  <th>Monto</th>
+                  <th>Método</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="tablaIngresos"></tbody>
+            </table>
+          </div>
+        </article>
+
+        <article class="card">
+          <div class="card-head">
+            <h3>Gastos del período actual</h3>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Fecha</th>
+                  <th>Descripción</th>
+                  <th>Monto</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="tablaGastos"></tbody>
+            </table>
+          </div>
+        </article>
+
+        <article class="card">
+          <div class="card-head">
+            <h3>Períodos</h3>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Período</th>
+                  <th>Inicio</th>
+                  <th>Fin</th>
+                  <th>Ingresos</th>
+                  <th>Gastos</th>
+                  <th>Ganancia</th>
+                  <th>Estado</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="tablaPeriodos"></tbody>
+            </table>
+          </div>
+        </article>
+      </section>
+
+      <section id="exportarTab" class="tab-content">
+        <article class="card form-card wide-card">
+          <div class="card-head">
+            <div>
+              <p class="eyebrow">Reportes</p>
+              <h3>Exportación profesional</h3>
+              <p class="muted">Exporta reportes separados por módulo y período. No mezcla caja con trabajadores.</p>
+            </div>
+          </div>
+
+          <div class="split-grid compact">
+            <div class="field">
+              <label>Selecciona módulo</label>
+              <select id="exportType">
+                <option value="INGRESOS">Ingresos</option>
+                <option value="GASTOS">Gastos</option>
+                <option value="ADELANTOS">Adelantos</option>
+                <option value="PRESTAMOS">Préstamos</option>
+                <option value="PERIODOS">Períodos</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label>Período</label>
+              <select id="exportPeriodo"></select>
+            </div>
+          </div>
+
+          <div class="actions-grid single-row">
+            <button id="btnExportCsv" class="btn btn-secondary">Exportar Excel/CSV</button>
+            <button id="btnExportPdf" class="btn btn-warning">Exportar PDF</button>
+          </div>
+        </article>
+      </section>
+    </main>
   </div>
 
   <script src="app.js"></script>
